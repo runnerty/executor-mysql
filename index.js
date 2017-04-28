@@ -2,9 +2,7 @@
 
 var mysql = require("mysql");
 var csv = require("fast-csv");
-//var loadSQLFile = require("../../libs/utils.js").loadSQLFile;
 var loadSQLFile = global.libUtils.loadSQLFile;
-
 var Execution = global.ExecutionClass;
 
 class mysqlExecutor extends Execution {
@@ -12,7 +10,7 @@ class mysqlExecutor extends Execution {
     super(process);
   }
 
-  exec() {
+  exec(params) {
     var _this = this;
     var endOptions = {end: 'end'};
 
@@ -62,7 +60,7 @@ class mysqlExecutor extends Execution {
       });
     }
 
-    function evaluateResults(results, resolve, reject) {
+    function evaluateResults(results) {
       if (results instanceof Array) {
 
         csv.writeToString(results, {headers: true}, function (err, data) {
@@ -72,7 +70,7 @@ class mysqlExecutor extends Execution {
           endOptions.execute_db_results = JSON.stringify(results);
           endOptions.execute_db_results_object = results;
           endOptions.execute_db_results_csv = data;
-          _this.end(endOptions, resolve, reject);
+          _this.end(endOptions);
         });
 
       } else {
@@ -88,62 +86,50 @@ class mysqlExecutor extends Execution {
           endOptions.execute_db_warningCount = results.warningCount;
           endOptions.execute_db_message = results.message;
         }
-        _this.end(endOptions, resolve, reject);
+        _this.end(endOptions);
       }
-
     }
 
-    return new Promise(function (resolve, reject) {
-      _this.getValues()
-        .then((res) => {
-          if (res.command) {
-            executeQuery(res)
+    if (params.command) {
+      executeQuery(res)
+        .then((results) => {
+          evaluateResults(results, resolve, reject);
+        })
+        .catch(function (err) {
+          endOptions.end = 'error';
+          endOptions.messageLog = `executeMysql executeQuery: ${err}`;
+          endOptions.execute_err_return = `executeMysql executeQuery: ${err}`;
+          _this.end(endOptions);
+        });
+    } else {
+      if (params.command_file) {
+        loadSQLFile(params.command_file)
+          .then((fileContent) => {
+            params.command = fileContent;
+            executeQuery(params)
               .then((results) => {
-                evaluateResults(results, resolve, reject);
+                evaluateResults(results);
               })
               .catch(function (err) {
                 endOptions.end = 'error';
-                endOptions.messageLog = `executeMysql executeQuery: ${err}`;
-                endOptions.execute_err_return = `executeMysql executeQuery: ${err}`;
-                _this.end(endOptions, resolve, reject);
+                endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
+                endOptions.execute_err_return = `executeMysql executeQuery from file: ${err}`;
+                _this.end(endOptions);
               });
-          } else {
-            if (res.command_file) {
-              loadSQLFile(res.command_file)
-                .then((fileContent) => {
-                  res.command = fileContent;
-                  executeQuery(res)
-                    .then((results) => {
-                      evaluateResults(results, resolve, reject);
-                    })
-                    .catch(function (err) {
-                      endOptions.end = 'error';
-                      endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
-                      endOptions.execute_err_return = `executeMysql executeQuery from file: ${err}`;
-                      _this.end(endOptions, resolve, reject);
-                    });
-                })
-                .catch(function (err) {
-                  endOptions.end = 'error';
-                  endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
-                  endOptions.execute_err_return = `executeMysql loadSQLFile: ${err}`;
-                  _this.end(endOptions, resolve, reject);
-                });
-            } else {
-              endOptions.end = 'error';
-              endOptions.messageLog = `executeMysql dont have command or command_file`;
-              endOptions.execute_err_return = `executeMysql dont have command or command_file`;
-              _this.end(endOptions, resolve, reject);
-            }
-          }
-        })
-        .catch((err) => {
-          endOptions.end = 'error';
-          endOptions.messageLog = `mysqlExecutor Error getValues: ${err}`;
-          endOptions.execute_err_return = `mysqlExecutor Error getValues: ${err}`;
-          _this.end(endOptions, resolve, reject);
-        });
-    });
+          })
+          .catch(function (err) {
+            endOptions.end = 'error';
+            endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
+            endOptions.execute_err_return = `executeMysql loadSQLFile: ${err}`;
+            _this.end(endOptions);
+          });
+      } else {
+        endOptions.end = 'error';
+        endOptions.messageLog = `executeMysql dont have command or command_file`;
+        endOptions.execute_err_return = `executeMysql dont have command or command_file`;
+        _this.end(endOptions);
+      }
+    }
   }
 }
 
