@@ -44,15 +44,15 @@ class mysqlExecutor extends Execution {
 
         connection.connect(function (err) {
           if (err) {
-            reject(new Error(`Error connecting Mysql: ${err}`));
+            reject(`Error connecting Mysql: ${err}`);
           } else {
             connection.query(_query, null, function (err, results) {
-              connection.end();
               if (err) {
-                throw new Error(`executeMysql query ${_query}: ${err}`);
+                reject(`executeMysql query ${_query}: ${err}`);
               } else {
                 resolve(results);
               }
+              connection.end();
             });
           }
         });
@@ -91,7 +91,7 @@ class mysqlExecutor extends Execution {
     }
 
     if (params.command) {
-      executeQuery(res)
+      executeQuery(params)
         .then((results) => {
           evaluateResults(results, resolve, reject);
         })
