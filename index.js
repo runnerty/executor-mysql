@@ -56,7 +56,6 @@ class mysqlExecutor extends Execution {
             });
           }
         });
-
       });
     }
 
