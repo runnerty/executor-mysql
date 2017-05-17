@@ -12,7 +12,7 @@ class mysqlExecutor extends Execution {
 
   exec(params) {
     var _this = this;
-    var endOptions = {end: 'end'};
+    var endOptions = {end: "end"};
 
     function executeQuery(values) {
 
@@ -21,7 +21,7 @@ class mysqlExecutor extends Execution {
           useArgsValues: true,
           useProcessValues: true,
           useGlobalValues: true,
-          altValueReplace: 'null'
+          altValueReplace: "null"
         };
 
         var _query = await _this.paramsReplace(values.command, options);
@@ -65,7 +65,7 @@ class mysqlExecutor extends Execution {
 
         csv.writeToString(results, {headers: true}, function (err, data) {
           if (err) {
-            _this.logger.log('error', `Generating csv output for execute_db_results_csv: ${err}. Results: ${results}`);
+            _this.logger.log("error", `Generating csv output for execute_db_results_csv: ${err}. Results: ${results}`);
           }
           endOptions.execute_db_results = JSON.stringify(results);
           endOptions.execute_db_results_object = results;
@@ -76,9 +76,9 @@ class mysqlExecutor extends Execution {
       } else {
 
         if (results instanceof Object) {
-          endOptions.execute_db_results = '';
+          endOptions.execute_db_results = "";
           endOptions.execute_db_results_object = [];
-          endOptions.execute_db_results_csv = '';
+          endOptions.execute_db_results_csv = "";
           endOptions.execute_db_fieldCount = results.fieldCount;
           endOptions.execute_db_affectedRows = results.affectedRows;
           endOptions.execute_db_changedRows = results.changedRows;
@@ -91,12 +91,12 @@ class mysqlExecutor extends Execution {
     }
 
     if (params.command) {
-      executeQuery(res)
+      executeQuery(params)
         .then((results) => {
-          evaluateResults(results, resolve, reject);
+          evaluateResults(results);
         })
         .catch(function (err) {
-          endOptions.end = 'error';
+          endOptions.end = "error";
           endOptions.messageLog = `executeMysql executeQuery: ${err}`;
           endOptions.execute_err_return = `executeMysql executeQuery: ${err}`;
           _this.end(endOptions);
@@ -111,22 +111,22 @@ class mysqlExecutor extends Execution {
                 evaluateResults(results);
               })
               .catch(function (err) {
-                endOptions.end = 'error';
+                endOptions.end = "error";
                 endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
                 endOptions.execute_err_return = `executeMysql executeQuery from file: ${err}`;
                 _this.end(endOptions);
               });
           })
           .catch(function (err) {
-            endOptions.end = 'error';
+            endOptions.end = "error";
             endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
             endOptions.execute_err_return = `executeMysql loadSQLFile: ${err}`;
             _this.end(endOptions);
           });
       } else {
-        endOptions.end = 'error';
-        endOptions.messageLog = `executeMysql dont have command or command_file`;
-        endOptions.execute_err_return = `executeMysql dont have command or command_file`;
+        endOptions.end = "error";
+        endOptions.messageLog = "executeMysql dont have command or command_file";
+        endOptions.execute_err_return = "executeMysql dont have command or command_file";
         _this.end(endOptions);
       }
     }
