@@ -1,9 +1,9 @@
 {
-  "name": "runnerty-executor-mysql",
-  "version": "1.0.2",
+  "name": "@runnerty/executor-mysql",
+  "version": "0.0.1",
   "description": "Runnerty module: MySql executor",
   "author": "Coderty",
-  "license": "ISC",
+  "license": "MIT",
   "main": "index.js",
   "repository": {
     "type": "git",
