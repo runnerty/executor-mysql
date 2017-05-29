@@ -66,6 +66,7 @@ class mysqlExecutor extends Execution {
           if (err) {
             _this.logger.log("error", `Generating csv output for execute_db_results_csv: ${err}. Results: ${results}`);
           }
+          endOptions.execute_db_countRows = results.length;
           endOptions.execute_db_results = JSON.stringify(results);
           endOptions.execute_db_results_object = results;
           endOptions.execute_db_results_csv = data;
