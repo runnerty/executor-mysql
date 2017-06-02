@@ -20,7 +20,8 @@
           "debug": {"type": "boolean"},
           "flags": {"type": "string"},
           "multipleStatements": {"type": "boolean"},
-          "ssl": {"type": "object"}
+          "ssl": {"type": "object"},
+          "connectTimeout": {"type": "number"}
       }
     },
     "params":

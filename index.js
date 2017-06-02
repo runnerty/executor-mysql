@@ -39,7 +39,8 @@ class mysqlExecutor extends Execution {
           charset: values.charset,
           timezone: values.timezone,
           insecureAuth: values.insecureAuth,
-          debug: values.debug
+          debug: values.debug,
+          connectTimeout: values.connectTimeout || 30000,
         });
 
         connection.connect(function (err) {
