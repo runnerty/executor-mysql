@@ -63,6 +63,29 @@ class mysqlExecutor extends Execution {
     function evaluateResults(results) {
       if (results instanceof Array) {
 
+        if (params.xlsxFileExport){
+          let workbook = new Excel.Workbook();
+          workbook.creator = 'Runnerty';
+          workbook.lastPrinted = new Date();
+
+          let columns = [];
+          for (var i = 0; i < Object.keys(results[0]).length; i++){
+            columns.push({
+              header: Object.keys(results[0])[i],
+              key: Object.keys(results[0])[i],
+              width: 30
+            });
+          }
+
+          let sheet = workbook.addWorksheet("sheet");
+          sheet.columns = columns;
+          sheet.addRows(results);
+
+          workbook.xlsx.writeFile(params.xlsxFileExport).then(function() {
+              console.log("xls file is written.");
+          });
+        }
+        
         csv.writeToString(results, {headers: true}, function (err, data) {
           if (err) {
             _this.logger.log("error", `Generating csv output for execute_db_results_csv: ${err}. Results: ${results}`);
