@@ -81,16 +81,17 @@ class mysqlExecutor extends Execution {
           workbook.lastPrinted = new Date();
 
           let columns = [];
-          for (var i = 0; i < Object.keys(results[0]).length; i++){
-            columns.push({
-              header: Object.keys(results[0])[i],
-              key: Object.keys(results[0])[i],
-              width: 30
-            });
+          if (results.length){
+            for (var i = 0; i < Object.keys(results[0]).length; i++){
+              columns.push({
+                header: Object.keys(results[0])[i],
+                key: Object.keys(results[0])[i],
+                width: 30
+              });
+            }
+            sheet.columns = columns;
+            sheet.addRows(results);
           }
-
-          sheet.columns = columns;
-          sheet.addRows(results);
 
           if (params.xlsxFileExport){
             workbook.xlsx.writeFile(params.xlsxFileExport).then(function(err, data) {
@@ -113,7 +114,7 @@ class mysqlExecutor extends Execution {
         endOptions.execute_db_results = JSON.stringify(results);
         endOptions.execute_db_results_object = results;
         _this.end(endOptions);
-        
+
       } else {
 
         if (results instanceof Object) {
