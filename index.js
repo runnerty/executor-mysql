@@ -63,9 +63,21 @@ class mysqlExecutor extends Execution {
     function evaluateResults(results) {
       if (results instanceof Array) {
 
-        if (params.xlsxFileExport){
+        if (params.xlsxFileExport || params.csvFileExport){
+          let author = "Runnerty";
+          let sheetName = "Sheet";
+
+          if (params.xlsxAuthorName){
+            author = params.xlsxAuthorName;
+          }
+
+          if (params.xlsxSheetName){
+            sheetName = params.xlsxSheetName;
+          }
+
           let workbook = new Excel.Workbook();
-          workbook.creator = 'Runnerty';
+          let sheet = workbook.addWorksheet(sheetName);
+          workbook.creator = author;
           workbook.lastPrinted = new Date();
 
           let columns = [];
@@ -77,26 +89,31 @@ class mysqlExecutor extends Execution {
             });
           }
 
-          let sheet = workbook.addWorksheet("sheet");
           sheet.columns = columns;
           sheet.addRows(results);
 
-          workbook.xlsx.writeFile(params.xlsxFileExport).then(function() {
-              console.log("xls file is written.");
-          });
+          if (params.xlsxFileExport){
+            workbook.xlsx.writeFile(params.xlsxFileExport).then(function(err, data) {
+              if (err){
+                _this.logger.log("error", `Generating xlsx: ${err}. Results: ${results}`);
+              }
+            });
+          }
+
+          if (params.csvFileExport){
+            workbook.csv.writeFile(params.csvFileExport).then(function(err, data) {
+              if (err){
+                _this.logger.log("error", `Generating csv: ${err}. Results: ${results}`);
+              }
+            });
+          }
         }
         
-        csv.writeToString(results, {headers: true}, function (err, data) {
-          if (err) {
-            _this.logger.log("error", `Generating csv output for execute_db_results_csv: ${err}. Results: ${results}`);
-          }
-          endOptions.execute_db_countRows = results.length;
-          endOptions.execute_db_results = JSON.stringify(results);
-          endOptions.execute_db_results_object = results;
-          endOptions.execute_db_results_csv = data;
-          _this.end(endOptions);
-        });
-
+        endOptions.execute_db_countRows = results.length;
+        endOptions.execute_db_results = JSON.stringify(results);
+        endOptions.execute_db_results_object = results;
+        _this.end(endOptions);
+        
       } else {
 
         if (results instanceof Object) {

@@ -21,7 +21,11 @@
           "flags": {"type": "string"},
           "multipleStatements": {"type": "boolean"},
           "ssl": {"type": "object"},
-          "connectTimeout": {"type": "number"}
+          "connectTimeout": {"type": "number"},
+          "csvFileExport": {"type": "string"},
+          "xlsxFileExport": {"type": "string"},
+          "xlsxAuthorName": {"type": "string"},
+          "xlsxSheetName": {"type": "string"}
       }
     },
     "params":
@@ -33,7 +37,10 @@
           "properties":{
             "id": {"type": "string"},
             "command": {"type": "string"},
-            "xlsxFileExport": {"type": "string"}
+            "csvFileExport": {"type": "string"},
+            "xlsxFileExport": {"type": "string"},
+            "xlsxAuthorName": {"type": "string"},
+            "xlsxSheetName": {"type": "string"}
           }
         },
         {
@@ -42,7 +49,10 @@
           "properties":{
             "id": {"type": "string"},
             "command_file": {"type": "string"},
-            "xlsxFileExport": {"type": "string"}
+            "csvFileExport": {"type": "string"},
+            "xlsxFileExport": {"type": "string"},
+            "xlsxAuthorName": {"type": "string"},
+            "xlsxSheetName": {"type": "string"}
           }
         }
       ]
