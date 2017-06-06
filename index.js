@@ -63,16 +63,57 @@ class mysqlExecutor extends Execution {
     function evaluateResults(results) {
       if (results instanceof Array) {
 
-        csv.writeToString(results, {headers: true}, function (err, data) {
-          if (err) {
-            _this.logger.log("error", `Generating csv output for execute_db_results_csv: ${err}. Results: ${results}`);
+        if (params.xlsxFileExport || params.csvFileExport){
+          let author = "Runnerty";
+          let sheetName = "Sheet";
+
+          if (params.xlsxAuthorName){
+            author = params.xlsxAuthorName;
           }
-          endOptions.execute_db_countRows = results.length;
-          endOptions.execute_db_results = JSON.stringify(results);
-          endOptions.execute_db_results_object = results;
-          endOptions.execute_db_results_csv = data;
-          _this.end(endOptions);
-        });
+
+          if (params.xlsxSheetName){
+            sheetName = params.xlsxSheetName;
+          }
+
+          let workbook = new Excel.Workbook();
+          let sheet = workbook.addWorksheet(sheetName);
+          workbook.creator = author;
+          workbook.lastPrinted = new Date();
+
+          let columns = [];
+          if (results.length){
+            for (var i = 0; i < Object.keys(results[0]).length; i++){
+              columns.push({
+                header: Object.keys(results[0])[i],
+                key: Object.keys(results[0])[i],
+                width: 30
+              });
+            }
+            sheet.columns = columns;
+            sheet.addRows(results);
+          }
+
+          if (params.xlsxFileExport){
+            workbook.xlsx.writeFile(params.xlsxFileExport).then(function(err, data) {
+              if (err){
+                _this.logger.log("error", `Generating xlsx: ${err}. Results: ${results}`);
+              }
+            });
+          }
+
+          if (params.csvFileExport){
+            workbook.csv.writeFile(params.csvFileExport).then(function(err, data) {
+              if (err){
+                _this.logger.log("error", `Generating csv: ${err}. Results: ${results}`);
+              }
+            });
+          }
+        }
+        
+        endOptions.execute_db_countRows = results.length;
+        endOptions.execute_db_results = JSON.stringify(results);
+        endOptions.execute_db_results_object = results;
+        _this.end(endOptions);
 
       } else {
 

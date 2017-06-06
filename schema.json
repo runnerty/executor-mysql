@@ -21,7 +21,11 @@
           "flags": {"type": "string"},
           "multipleStatements": {"type": "boolean"},
           "ssl": {"type": "object"},
-          "connectTimeout": {"type": "number"}
+          "connectTimeout": {"type": "number"},
+          "csvFileExport": {"type": "string"},
+          "xlsxFileExport": {"type": "string"},
+          "xlsxAuthorName": {"type": "string"},
+          "xlsxSheetName": {"type": "string"}
       }
     },
     "params":
@@ -32,7 +36,11 @@
           "required": ["id","command"],
           "properties":{
             "id": {"type": "string"},
-            "command": {"type": "string"}
+            "command": {"type": "string"},
+            "csvFileExport": {"type": "string"},
+            "xlsxFileExport": {"type": "string"},
+            "xlsxAuthorName": {"type": "string"},
+            "xlsxSheetName": {"type": "string"}
           }
         },
         {
@@ -40,7 +48,11 @@
           "required": ["id","command_file"],
           "properties":{
             "id": {"type": "string"},
-            "command_file": {"type": "string"}
+            "command_file": {"type": "string"},
+            "csvFileExport": {"type": "string"},
+            "xlsxFileExport": {"type": "string"},
+            "xlsxAuthorName": {"type": "string"},
+            "xlsxSheetName": {"type": "string"}
           }
         }
       ]
