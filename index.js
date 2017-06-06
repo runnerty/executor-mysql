@@ -1,7 +1,7 @@
 "use strict";
 
 var mysql = require("mysql");
-var csv = require("fast-csv");
+var Excel = require("exceljs");
 var loadSQLFile = global.libUtils.loadSQLFile;
 var Execution = global.ExecutionClass;
 
