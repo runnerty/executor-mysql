@@ -20,7 +20,6 @@
   "homepage": "https://github.com/Coderty/runnerty-executor-mysql#readme",
   "dependencies": {
     "mysql": "^2.13.0",
-    "exceljs": "^0.4.10",
-    "fast-csv": "^2.4.0"
+    "exceljs": "^0.4.10"
   }
 }
