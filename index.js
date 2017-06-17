@@ -18,7 +18,7 @@ class mysqlExecutor extends Execution {
 
       return new Promise(async function (resolve, reject) {
         var options = {
-          useArgsValues: true,
+          useExtraValue: values.args || false,
           useProcessValues: true,
           useGlobalValues: true,
           altValueReplace: "null"
