@@ -4,7 +4,7 @@
 ```json
 {
   "id": "mysql_default",
-  "type": "@runnerty/executor-mysql",
+  "type": "@runnerty-executor-mysql",
   "user": "mysqlusr",
   "password": "mysqlpass",
   "database": "MYDB",
