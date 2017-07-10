@@ -109,24 +109,37 @@ class mysqlExecutor extends Execution {
             });
           }
         }
-        
-        endOptions.execute_db_countRows = results.length;
-        endOptions.execute_db_results = JSON.stringify(results);
-        endOptions.execute_db_results_object = results;
+        //STANDARD OUPUT:
+        endOptions.data_output = results;
+        endOptions.msg_output = results.message || "";
+        //EXTRA DATA OUTPUT:
+        endOptions.extra_output = {};
+        endOptions.extra_output.db_countRows = results.length;
+        endOptions.extra_output.db_firstRow = JSON.stringify(results[0]);
+        if (results[0] instanceof Object) {
+          let keys = Object.keys(results[0]);
+          let keysLength = keys.length;
+          while (keysLength--) {
+            let key = keys[keysLength];
+            endOptions.extra_output["db_firstRow_"+key] = results[0][key];
+          }
+        }
+
         _this.end(endOptions);
 
       } else {
 
         if (results instanceof Object) {
-          endOptions.execute_db_results = "";
-          endOptions.execute_db_results_object = [];
-          endOptions.execute_db_results_csv = "";
-          endOptions.execute_db_fieldCount = results.fieldCount;
-          endOptions.execute_db_affectedRows = results.affectedRows;
-          endOptions.execute_db_changedRows = results.changedRows;
-          endOptions.execute_db_insertId = results.insertId;
-          endOptions.execute_db_warningCount = results.warningCount;
-          endOptions.execute_db_message = results.message;
+          endOptions.data_output = "";
+          endOptions.msg_output = results.message || "";
+          //EXTRA DATA OUTPUT:
+          endOptions.extra_output = {};
+          endOptions.extra_output.db_fieldCount = results.fieldCount;
+          endOptions.extra_output.db_affectedRows = results.affectedRows;
+          endOptions.extra_output.db_changedRows = results.changedRows;
+          endOptions.extra_output.db_insertId = results.insertId;
+          endOptions.extra_output.db_warningCount = results.warningCount;
+          endOptions.extra_output.db_message = results.message;
         }
         _this.end(endOptions);
       }
@@ -140,7 +153,7 @@ class mysqlExecutor extends Execution {
         .catch(function (err) {
           endOptions.end = "error";
           endOptions.messageLog = `executeMysql executeQuery: ${err}`;
-          endOptions.execute_err_return = `executeMysql executeQuery: ${err}`;
+          endOptions.err_output = `executeMysql executeQuery: ${err}`;
           _this.end(endOptions);
         });
     } else {
@@ -155,20 +168,20 @@ class mysqlExecutor extends Execution {
               .catch(function (err) {
                 endOptions.end = "error";
                 endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
-                endOptions.execute_err_return = `executeMysql executeQuery from file: ${err}`;
+                endOptions.err_output = `executeMysql executeQuery from file: ${err}`;
                 _this.end(endOptions);
               });
           })
           .catch(function (err) {
             endOptions.end = "error";
             endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
-            endOptions.execute_err_return = `executeMysql loadSQLFile: ${err}`;
+            endOptions.err_output = `executeMysql loadSQLFile: ${err}`;
             _this.end(endOptions);
           });
       } else {
         endOptions.end = "error";
         endOptions.messageLog = "executeMysql dont have command or command_file";
-        endOptions.execute_err_return = "executeMysql dont have command or command_file";
+        endOptions.err_output = "executeMysql dont have command or command_file";
         _this.end(endOptions);
       }
     }

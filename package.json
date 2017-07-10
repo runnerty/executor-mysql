@@ -1,6 +1,6 @@
 {
   "name": "@runnerty/executor-mysql",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Runnerty module: MySql executor",
   "author": "Coderty",
   "license": "MIT",
