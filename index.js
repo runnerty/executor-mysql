@@ -101,8 +101,10 @@ class mysqlExecutor extends Execution {
             });
           }
 
+          console.log('params.csvOptions', params.csvOptions);
+          
           if (params.csvFileExport){
-            workbook.csv.writeFile(params.csvFileExport).then(function(err, data) {
+            workbook.csv.writeFile(params.csvFileExport, params.csvOptions).then(function(err, data) {
               if (err){
                 _this.logger.log("error", `Generating csv: ${err}. Results: ${results}`);
               }
