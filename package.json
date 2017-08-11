@@ -7,7 +7,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Coderty/runnerty-executor-mysql.git"
+    "url": "git+https://github.com/runnerty/executor-mysql.git.git"
   },
   "keywords": [
     "runnerty",
@@ -15,9 +15,9 @@
     "mysql"
   ],
   "bugs": {
-    "url": "https://github.com/Coderty/runnerty-executor-mysql/issues"
+    "url": "https://github.com/runnerty/executor-mysql/issues"
   },
-  "homepage": "https://github.com/Coderty/runnerty-executor-mysql#readme",
+  "homepage": "https://github.com/runnerty/executor-mysql#readme",
   "dependencies": {
     "exceljs": "^0.5.1",
     "mysql": "^2.14.1"
