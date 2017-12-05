@@ -27,7 +27,7 @@ class mysqlExecutor extends Execution {
         var _query = await _this.paramsReplace(values.command, options);
         endOptions.command_executed = _query;
 
-        var connection = mysql.createConnection({
+        let pool = mysql.createPool({
           host: values.host,
           socketPath: values.socketPath,
           port: values.port,
@@ -40,10 +40,10 @@ class mysqlExecutor extends Execution {
           timezone: values.timezone,
           insecureAuth: values.insecureAuth,
           debug: values.debug,
-          connectTimeout: values.connectTimeout || 30000,
+          connectTimeout: values.connectTimeout || 30000
         });
 
-        connection.connect(function (err) {
+        pool.getConnection(function (err, connection) {
           if (err) {
             reject(`Error connecting Mysql: ${err}`);
           } else {
@@ -53,10 +53,11 @@ class mysqlExecutor extends Execution {
               } else {
                 resolve(results);
               }
-              connection.end();
+              connection.destroy();
             });
           }
         });
+
       });
     }
 
@@ -100,7 +101,7 @@ class mysqlExecutor extends Execution {
               }
             });
           }
-          
+
           if (params.csvFileExport){
             workbook.csv.writeFile(params.csvFileExport, params.csvOptions).then(function(err, data) {
               if (err){
@@ -123,6 +124,7 @@ class mysqlExecutor extends Execution {
             let key = keys[keysLength];
             endOptions.extra_output["db_firstRow_"+key] = results[0][key];
           }
+          console.log(endOptions.extra_output);
         }
 
         _this.end(endOptions);
@@ -148,36 +150,36 @@ class mysqlExecutor extends Execution {
     if (params.command) {
       executeQuery(params)
         .then((results) => {
-          evaluateResults(results);
-        })
-        .catch(function (err) {
-          endOptions.end = "error";
-          endOptions.messageLog = `executeMysql executeQuery: ${err}`;
-          endOptions.err_output = `executeMysql executeQuery: ${err}`;
-          _this.end(endOptions);
-        });
+        evaluateResults(results);
+    })
+    .catch(function (err) {
+        endOptions.end = "error";
+        endOptions.messageLog = `executeMysql executeQuery: ${err}`;
+        endOptions.err_output = `executeMysql executeQuery: ${err}`;
+        _this.end(endOptions);
+      });
     } else {
       if (params.command_file) {
         loadSQLFile(params.command_file)
           .then((fileContent) => {
-            params.command = fileContent;
-            executeQuery(params)
-              .then((results) => {
-                evaluateResults(results);
-              })
-              .catch(function (err) {
-                endOptions.end = "error";
-                endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
-                endOptions.err_output = `executeMysql executeQuery from file: ${err}`;
-                _this.end(endOptions);
-              });
-          })
-          .catch(function (err) {
-            endOptions.end = "error";
-            endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
-            endOptions.err_output = `executeMysql loadSQLFile: ${err}`;
-            _this.end(endOptions);
-          });
+          params.command = fileContent;
+        executeQuery(params)
+          .then((results) => {
+          evaluateResults(results);
+      })
+      .catch(function (err) {
+          endOptions.end = "error";
+          endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
+          endOptions.err_output = `executeMysql executeQuery from file: ${err}`;
+          _this.end(endOptions);
+        });
+      })
+      .catch(function (err) {
+          endOptions.end = "error";
+          endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
+          endOptions.err_output = `executeMysql loadSQLFile: ${err}`;
+          _this.end(endOptions);
+        });
       } else {
         endOptions.end = "error";
         endOptions.messageLog = "executeMysql dont have command or command_file";
