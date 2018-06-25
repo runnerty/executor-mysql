@@ -109,6 +109,9 @@
         },
         "xlsxSheetName": {
           "type": "string"
+        },
+        "fileExport": {
+          "type": "string"
         }
       }
     },
@@ -140,6 +143,9 @@
               "type": "string"
             },
             "xlsxSheetName": {
+              "type": "string"
+            },
+            "fileExport": {
               "type": "string"
             },
             "csvOptions": {
@@ -211,6 +217,9 @@
               "type": "string"
             },
             "xlsxSheetName": {
+              "type": "string"
+            },
+            "fileExport": {
               "type": "string"
             },
             "csvOptions": {
