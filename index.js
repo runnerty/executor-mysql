@@ -2,6 +2,8 @@
 
 var mysql = require("mysql");
 var Excel = require("exceljs");
+var fs = require('fs');
+
 var loadSQLFile = global.libUtils.loadSQLFile;
 var Execution = global.ExecutionClass;
 
@@ -64,7 +66,7 @@ class mysqlExecutor extends Execution {
     function evaluateResults(results) {
       if (results instanceof Array) {
 
-        if (params.xlsxFileExport || params.csvFileExport){
+        if (params.xlsxFileExport || params.csvFileExport || params.fileExport){
           let author = "Runnerty";
           let sheetName = "Sheet";
 
@@ -109,6 +111,14 @@ class mysqlExecutor extends Execution {
               }
             });
           }
+
+          if (params.fileExport){
+            fs.writeFile(params.fileExport, JSON.stringify(results), 'utf8', function (err) {
+              if (err) {
+                _this.logger.log("error", `Generating file: ${err}. Results: ${results}`);
+              }
+            });
+          }
         }
         //STANDARD OUPUT:
         endOptions.data_output = results;
@@ -124,7 +134,6 @@ class mysqlExecutor extends Execution {
             let key = keys[keysLength];
             endOptions.extra_output["db_firstRow_"+key] = results[0][key];
           }
-          console.log(endOptions.extra_output);
         }
 
         _this.end(endOptions);
