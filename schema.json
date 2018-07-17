@@ -57,6 +57,9 @@
         "connectTimeout": {
           "type": "number"
         },
+        "acquireTimeout": {
+          "type": "number"
+        },
         "csvFileExport": {
           "type": "string"
         },
