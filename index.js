@@ -17,8 +17,8 @@ class mysqlExecutor extends Execution {
     let endOptions = {end: "end"};
 
     function executeQuery(values) {
-
-      return new Promise(async function (resolve, reject) {
+      
+      return new Promise(async (resolve, reject) =>{
         const options = {
           useExtraValue: values.args || false,
           useProcessValues: true,
@@ -46,21 +46,25 @@ class mysqlExecutor extends Execution {
           acquireTimeout: values.acquireTimeout || 60000
         });
 
-        pool.getConnection(function (err, connection) {
+        pool.getConnection((err, connection) => {
           if (err) {
             reject(`Error connecting Mysql: ${err}`);
           } else {
-            connection.query(_query, null, function (err, results) {
+            connection.query(_query, null, (err, results) => {
               if (err) {
                 reject(`executeMysql query ${_query}: ${err}`);
               } else {
                 resolve(results);
               }
               connection.destroy();
+              pool.end((err)=>{
+                if(err){
+                  _this.logger.debug("Ending pool error:",err);
+                }
+              });
             });
           }
         });
-
       });
     }
 
@@ -162,7 +166,7 @@ class mysqlExecutor extends Execution {
         .then((results) => {
           evaluateResults(results);
         })
-        .catch(function (err) {
+        .catch((err) =>{
           endOptions.end = "error";
           endOptions.messageLog = `executeMysql executeQuery: ${err}`;
           endOptions.err_output = `executeMysql executeQuery: ${err}`;
