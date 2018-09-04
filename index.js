@@ -17,7 +17,7 @@ class mysqlExecutor extends Execution {
     let endOptions = {end: "end"};
 
     function executeQuery(values) {
-      
+
       return new Promise(async (resolve, reject) =>{
         const options = {
           useExtraValue: values.args || false,
@@ -68,6 +68,26 @@ class mysqlExecutor extends Execution {
       });
     }
 
+    function prepareEndOptions(results){
+      let endOptions = {end: "end"};
+      //STANDARD OUPUT:
+      endOptions.data_output = results;
+      endOptions.msg_output  = results.message || "";
+      //EXTRA DATA OUTPUT:
+      endOptions.extra_output = {};
+      endOptions.extra_output.db_countRows = results.length;
+      endOptions.extra_output.db_firstRow  = JSON.stringify(results[0]);
+      if (results[0] instanceof Object) {
+        let keys = Object.keys(results[0]);
+        let keysLength = keys.length;
+        while (keysLength--) {
+          let key = keys[keysLength];
+          endOptions.extra_output["db_firstRow_"+key] = results[0][key];
+        }
+      }
+      return endOptions;
+    }
+
     function evaluateResults(results) {
       if (results instanceof Array) {
 
@@ -106,6 +126,7 @@ class mysqlExecutor extends Execution {
               if (err){
                 _this.logger.log("error", `Generating xlsx: ${err}. Results: ${results}`);
               }
+              _this.end(prepareEndOptions(results));
             });
           }
 
@@ -114,6 +135,7 @@ class mysqlExecutor extends Execution {
               if (err){
                 _this.logger.log("error", `Generating csv: ${err}. Results: ${results}`);
               }
+              _this.end(prepareEndOptions(results));
             });
           }
 
@@ -122,26 +144,10 @@ class mysqlExecutor extends Execution {
               if (err) {
                 _this.logger.log("error", `Generating file: ${err}. Results: ${results}`);
               }
+              _this.end(prepareEndOptions(results));
             });
           }
         }
-        //STANDARD OUPUT:
-        endOptions.data_output = results;
-        endOptions.msg_output = results.message || "";
-        //EXTRA DATA OUTPUT:
-        endOptions.extra_output = {};
-        endOptions.extra_output.db_countRows = results.length;
-        endOptions.extra_output.db_firstRow = JSON.stringify(results[0]);
-        if (results[0] instanceof Object) {
-          let keys = Object.keys(results[0]);
-          let keysLength = keys.length;
-          while (keysLength--) {
-            let key = keys[keysLength];
-            endOptions.extra_output["db_firstRow_"+key] = results[0][key];
-          }
-        }
-
-        _this.end(endOptions);
 
       } else {
 
@@ -160,6 +166,8 @@ class mysqlExecutor extends Execution {
         _this.end(endOptions);
       }
     }
+
+    // MAIN:
 
     if (params.command) {
       executeQuery(params)
