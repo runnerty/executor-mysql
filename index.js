@@ -26,7 +26,7 @@ class mysqlExecutor extends Execution {
           altValueReplace: "null"
         };
 
-        let _query = await _this.paramsReplace(values.command, options);
+        const _query = await _this.paramsReplace(values.command, options);
         endOptions.command_executed = _query;
 
         let pool = mysql.createPool({
@@ -71,7 +71,7 @@ class mysqlExecutor extends Execution {
     function prepareEndOptions(results){
       let endOptions = {end: "end"};
       //STANDARD OUPUT:
-      endOptions.data_output = results;
+      endOptions.data_output = !params.noReturnDataOutput?results:"";
       endOptions.msg_output  = results.message || "";
       //EXTRA DATA OUTPUT:
       endOptions.extra_output = {};
@@ -158,12 +158,12 @@ class mysqlExecutor extends Execution {
           endOptions.msg_output = results.message || "";
           //EXTRA DATA OUTPUT:
           endOptions.extra_output = {};
-          endOptions.extra_output.db_fieldCount = results.fieldCount;
+          endOptions.extra_output.db_fieldCount   = results.fieldCount;
           endOptions.extra_output.db_affectedRows = results.affectedRows;
-          endOptions.extra_output.db_changedRows = results.changedRows;
-          endOptions.extra_output.db_insertId = results.insertId;
+          endOptions.extra_output.db_changedRows  = results.changedRows;
+          endOptions.extra_output.db_insertId     = results.insertId;
           endOptions.extra_output.db_warningCount = results.warningCount;
-          endOptions.extra_output.db_message = results.message;
+          endOptions.extra_output.db_message      = results.message;
         }
         _this.end(endOptions);
       }
