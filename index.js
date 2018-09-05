@@ -147,6 +147,8 @@ class mysqlExecutor extends Execution {
               _this.end(prepareEndOptions(results));
             });
           }
+        }else{
+          _this.end(prepareEndOptions(results));
         }
 
       } else {
