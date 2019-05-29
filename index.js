@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
-const mysql = require("mysql");
-const Excel = require("exceljs");
-const fs = require("fs");
+const mysql = require('mysql');
+const Excel = require('exceljs');
+const fs = require('fs');
 
 const loadSQLFile = global.libUtils.loadSQLFile;
 const Execution = global.ExecutionClass;
@@ -14,16 +14,15 @@ class mysqlExecutor extends Execution {
 
   exec(params) {
     let _this = this;
-    let endOptions = {end: "end"};
+    let endOptions = { end: 'end' };
 
     function executeQuery(values) {
-
-      return new Promise(async (resolve, reject) =>{
+      return new Promise(async (resolve, reject) => {
         const options = {
           useExtraValue: values.args || false,
           useProcessValues: true,
           useGlobalValues: true,
-          altValueReplace: "null"
+          altValueReplace: 'null'
         };
 
         const _query = await _this.paramsReplace(values.command, options);
@@ -57,9 +56,9 @@ class mysqlExecutor extends Execution {
                 resolve(results);
               }
               connection.destroy();
-              pool.end((err)=>{
-                if(err){
-                  _this.logger.debug("Ending pool error:",err);
+              pool.end(err => {
+                if (err) {
+                  _this.logger.debug('Ending pool error:', err);
                 }
               });
             });
@@ -68,21 +67,20 @@ class mysqlExecutor extends Execution {
       });
     }
 
-    function prepareEndOptions(results){
-      let endOptions = {end: "end"};
+    function prepareEndOptions(results) {
       //STANDARD OUPUT:
-      endOptions.data_output = !params.noReturnDataOutput?results:"";
-      endOptions.msg_output  = results.message || "";
+      endOptions.data_output = !params.noReturnDataOutput ? results : '';
+      endOptions.msg_output = results.message || '';
       //EXTRA DATA OUTPUT:
       endOptions.extra_output = {};
       endOptions.extra_output.db_countRows = results.length;
-      endOptions.extra_output.db_firstRow  = JSON.stringify(results[0]);
+      endOptions.extra_output.db_firstRow = JSON.stringify(results[0]);
       if (results[0] instanceof Object) {
         let keys = Object.keys(results[0]);
         let keysLength = keys.length;
         while (keysLength--) {
           let key = keys[keysLength];
-          endOptions.extra_output["db_firstRow_"+key] = results[0][key];
+          endOptions.extra_output['db_firstRow_' + key] = results[0][key];
         }
       }
       return endOptions;
@@ -90,16 +88,19 @@ class mysqlExecutor extends Execution {
 
     function evaluateResults(results) {
       if (results instanceof Array) {
+        if (
+          params.xlsxFileExport ||
+          params.csvFileExport ||
+          params.fileExport
+        ) {
+          let author = 'Runnerty';
+          let sheetName = 'Sheet';
 
-        if (params.xlsxFileExport || params.csvFileExport || params.fileExport){
-          let author = "Runnerty";
-          let sheetName = "Sheet";
-
-          if (params.xlsxAuthorName){
+          if (params.xlsxAuthorName) {
             author = params.xlsxAuthorName;
           }
 
-          if (params.xlsxSheetName){
+          if (params.xlsxSheetName) {
             sheetName = params.xlsxSheetName;
           }
 
@@ -109,8 +110,8 @@ class mysqlExecutor extends Execution {
           workbook.lastPrinted = new Date();
 
           let columns = [];
-          if (results.length){
-            for (let i = 0; i < Object.keys(results[0]).length; i++){
+          if (results.length) {
+            for (let i = 0; i < Object.keys(results[0]).length; i++) {
               columns.push({
                 header: Object.keys(results[0])[i],
                 key: Object.keys(results[0])[i],
@@ -121,49 +122,63 @@ class mysqlExecutor extends Execution {
             sheet.addRows(results);
           }
 
-          if (params.xlsxFileExport){
-            workbook.xlsx.writeFile(params.xlsxFileExport).then((err, data) =>{
-              if (err){
-                _this.logger.log("error", `Generating xlsx: ${err}. Results: ${results}`);
-              }
-              _this.end(prepareEndOptions(results));
-            });
-          }
-
-          if (params.csvFileExport){
-            workbook.csv.writeFile(params.csvFileExport, params.csvOptions).then((err, data) =>{
-              if (err){
-                _this.logger.log("error", `Generating csv: ${err}. Results: ${results}`);
-              }
-              _this.end(prepareEndOptions(results));
-            });
-          }
-
-          if (params.fileExport){
-            fs.writeFile(params.fileExport, JSON.stringify(results), "utf8", (err) => {
+          if (params.xlsxFileExport) {
+            workbook.xlsx.writeFile(params.xlsxFileExport).then((err, data) => {
               if (err) {
-                _this.logger.log("error", `Generating file: ${err}. Results: ${results}`);
+                _this.logger.log(
+                  'error',
+                  `Generating xlsx: ${err}. Results: ${results}`
+                );
               }
               _this.end(prepareEndOptions(results));
             });
           }
-        }else{
+
+          if (params.csvFileExport) {
+            workbook.csv
+              .writeFile(params.csvFileExport, params.csvOptions)
+              .then((err, data) => {
+                if (err) {
+                  _this.logger.log(
+                    'error',
+                    `Generating csv: ${err}. Results: ${results}`
+                  );
+                }
+                _this.end(prepareEndOptions(results));
+              });
+          }
+
+          if (params.fileExport) {
+            fs.writeFile(
+              params.fileExport,
+              JSON.stringify(results),
+              'utf8',
+              err => {
+                if (err) {
+                  _this.logger.log(
+                    'error',
+                    `Generating file: ${err}. Results: ${results}`
+                  );
+                }
+                _this.end(prepareEndOptions(results));
+              }
+            );
+          }
+        } else {
           _this.end(prepareEndOptions(results));
         }
-
       } else {
-
         if (results instanceof Object) {
-          endOptions.data_output = "";
-          endOptions.msg_output = results.message || "";
+          endOptions.data_output = '';
+          endOptions.msg_output = results.message || '';
           //EXTRA DATA OUTPUT:
           endOptions.extra_output = {};
-          endOptions.extra_output.db_fieldCount   = results.fieldCount;
+          endOptions.extra_output.db_fieldCount = results.fieldCount;
           endOptions.extra_output.db_affectedRows = results.affectedRows;
-          endOptions.extra_output.db_changedRows  = results.changedRows;
-          endOptions.extra_output.db_insertId     = results.insertId;
+          endOptions.extra_output.db_changedRows = results.changedRows;
+          endOptions.extra_output.db_insertId = results.insertId;
           endOptions.extra_output.db_warningCount = results.warningCount;
-          endOptions.extra_output.db_message      = results.message;
+          endOptions.extra_output.db_message = results.message;
         }
         _this.end(endOptions);
       }
@@ -173,11 +188,11 @@ class mysqlExecutor extends Execution {
 
     if (params.command) {
       executeQuery(params)
-        .then((results) => {
+        .then(results => {
           evaluateResults(results);
         })
-        .catch((err) =>{
-          endOptions.end = "error";
+        .catch(err => {
+          endOptions.end = 'error';
           endOptions.messageLog = `executeMysql executeQuery: ${err}`;
           endOptions.err_output = `executeMysql executeQuery: ${err}`;
           _this.end(endOptions);
@@ -185,29 +200,31 @@ class mysqlExecutor extends Execution {
     } else {
       if (params.command_file) {
         loadSQLFile(params.command_file)
-          .then((fileContent) => {
+          .then(fileContent => {
             params.command = fileContent;
             executeQuery(params)
-              .then((results) => {
+              .then(results => {
                 evaluateResults(results);
               })
-              .catch((err) => {
-                endOptions.end = "error";
+              .catch(err => {
+                endOptions.end = 'error';
                 endOptions.messageLog = `executeMysql executeQuery from file: ${err}`;
                 endOptions.err_output = `executeMysql executeQuery from file: ${err}`;
                 _this.end(endOptions);
               });
           })
-          .catch((err) => {
-            endOptions.end = "error";
+          .catch(err => {
+            endOptions.end = 'error';
             endOptions.messageLog = `executeMysql loadSQLFile: ${err}`;
             endOptions.err_output = `executeMysql loadSQLFile: ${err}`;
             _this.end(endOptions);
           });
       } else {
-        endOptions.end = "error";
-        endOptions.messageLog = "executeMysql dont have command or command_file";
-        endOptions.err_output = "executeMysql dont have command or command_file";
+        endOptions.end = 'error';
+        endOptions.messageLog =
+          'executeMysql dont have command or command_file';
+        endOptions.err_output =
+          'executeMysql dont have command or command_file';
         _this.end(endOptions);
       }
     }
