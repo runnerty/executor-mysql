@@ -37,7 +37,7 @@
 ```
 
 ### Generation of files:
-The saved can be indicated in the file of the results obtained from a query in csv, xlsx and json format.
+The saved can be indicated in the file of the results obtained from a query in csv, xlsx and json format. These files will be generated with streams.
 You only have to indicate the corresponding property in the parameters:
 * `xlsxFileExport`: XLSX Formart file path
 * `csvFileExport`: CSV Formart file path
@@ -51,9 +51,21 @@ You only have to indicate the corresponding property in the parameters:
 }
 ```
 
+### Loading files:
+For file upload you must indicate the path of the file to be loaded in the `localInFile` parameter and in the `LOAD DATA LOCAL INFILE` statement you must indicate `mystream`. For example:
+* `localInFile`: Plain file path
+
+```json
+{
+  "id":"mysql_sample",
+  "command": "LOAD DATA LOCAL INFILE 'mystream' INTO TABLE DBSAMPLE.TABLESAMPLE FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'",
+  "localInFile": "/sample.csv"
+}
+```
+
 ### Output (Process values):
 #### Standard
-* `PROCESS_EXEC_MSG_OUTPUT`: MySQL output message. 
+* `PROCESS_EXEC_MSG_OUTPUT`: MySQL output message.
 * `PROCESS_EXEC_ERR_OUTPUT`: Error output message.
 #### Query output
 * `PROCESS_EXEC_DATA_OUTPUT`: MySQL query output data.
@@ -68,17 +80,6 @@ You only have to indicate the corresponding property in the parameters:
 * `PROCESS_EXEC_DB_WARNINGCOUNT`: MySQL warning count.
 * `PROCESS_EXEC_DB_MESSAGE`: MySQL message.
 
-### Other considerations
-If the result of your query is very large, you should consider using the "noReturnDataOutput" (boolean) property to prevent a large amount of data from entering memory and being interpreted by Runnerty, which could cause performance problems.
-
-```json
-{
-  "id":"mysql_sample",
-  "command": "SELECT * FROM LARGE_TABLE",
-  "csvFileExport": "@GV(WORK_DIR)/LARGE_DATA.csv",
-  "noReturnDataOutput": "true"
-}
-```
 
 
 [Runnerty]: http://www.runnerty.io

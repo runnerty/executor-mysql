@@ -65,45 +65,45 @@
         },
         "csvOptions": {
           "type": "object",
-          "properties" :{
+          "properties": {
             "objectMode": {
               "type": "boolean"
-              },
-              "headers": {
-                "type": ["boolean", "array"]
-              },
-              "ignoreEmpty": {
-                "type": "boolean"
-              },
-              "discardUnmappedColumns": {
-                "type": "boolean"
-              },
-              "strictColumnHandling": {
-                "type": "boolean"
-              },
-              "renameHeaders": {
-                "type": "boolean"
-              },
-              "delimiter": {
-                "type": "string"
-              },
-              "quote": {
-                "type": "string"
-              },
-              "escape": {
-                "type": "string"
-              },
-              "trim": {
-                "type": "boolean"
-              },
-              "rtrim": {
-                "type": "boolean"
-              },
-              "ltrim": {
-                "type": "boolean"
-              }
+            },
+            "headers": {
+              "type": ["boolean", "array"]
+            },
+            "ignoreEmpty": {
+              "type": "boolean"
+            },
+            "discardUnmappedColumns": {
+              "type": "boolean"
+            },
+            "strictColumnHandling": {
+              "type": "boolean"
+            },
+            "renameHeaders": {
+              "type": "boolean"
+            },
+            "delimiter": {
+              "type": "string"
+            },
+            "quote": {
+              "type": "string"
+            },
+            "escape": {
+              "type": "string"
+            },
+            "trim": {
+              "type": "boolean"
+            },
+            "rtrim": {
+              "type": "boolean"
+            },
+            "ltrim": {
+              "type": "boolean"
             }
-          },
+          }
+        },
         "xlsxFileExport": {
           "type": "string"
         },
@@ -115,6 +115,9 @@
         },
         "fileExport": {
           "type": "string"
+        },
+        "localInFile": {
+          "type": "string"
         }
       }
     },
@@ -122,10 +125,7 @@
       "oneOf": [
         {
           "type": "object",
-          "required": [
-            "id",
-            "command"
-          ],
+          "required": ["id", "command"],
           "properties": {
             "id": {
               "type": "string"
@@ -151,9 +151,12 @@
             "fileExport": {
               "type": "string"
             },
+            "localInFile": {
+              "type": "string"
+            },
             "csvOptions": {
               "type": "object",
-              "properties" :{
+              "properties": {
                 "objectMode": {
                   "type": "boolean"
                 },
@@ -196,10 +199,7 @@
         },
         {
           "type": "object",
-          "required": [
-            "id",
-            "command_file"
-          ],
+          "required": ["id", "command_file"],
           "properties": {
             "id": {
               "type": "string"
@@ -225,9 +225,12 @@
             "fileExport": {
               "type": "string"
             },
+            "localInFile": {
+              "type": "string"
+            },
             "csvOptions": {
               "type": "object",
-              "properties" :{
+              "properties": {
                 "objectMode": {
                   "type": "boolean"
                 },
