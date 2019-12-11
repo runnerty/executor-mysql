@@ -15,7 +15,9 @@ class mysqlExecutor extends Execution {
 
   exec(params) {
     let _this = this;
-    let endOptions = { end: 'end' };
+    let endOptions = {
+      end: 'end'
+    };
 
     function prepareQuery(values) {
       return new Promise(async (resolve, reject) => {
@@ -62,7 +64,7 @@ class mysqlExecutor extends Execution {
 
         if (params.localInFile) {
           if (fs.existsSync(params.localInFile)) {
-            queryOptions.infileStreamFactory = function() {
+            queryOptions.infileStreamFactory = function () {
               return fs.createReadStream(params.localInFile);
             };
           } else {
@@ -80,6 +82,7 @@ class mysqlExecutor extends Execution {
         let firstRow = {};
         let resultSetHeader;
         let rowCounter = 0;
+        let results = [];
 
         // XLSX FILE EXPORT
         // ****************
@@ -94,9 +97,9 @@ class mysqlExecutor extends Execution {
           let sheet = workbook.addWorksheet(
             params.xlsxSheetName ? params.xlsxSheetName : sheetName
           );
-          workbook.creator = params.xlsxAuthorName
-            ? params.xlsxAuthorName
-            : author;
+          workbook.creator = params.xlsxAuthorName ?
+            params.xlsxAuthorName :
+            author;
 
           workbook.lastPrinted = new Date();
 
@@ -131,7 +134,9 @@ class mysqlExecutor extends Execution {
         else if (params.csvFileExport) {
           const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
           const csvStream = csv
-            .format(params.csvOptions || { headers: true })
+            .format(params.csvOptions || {
+              headers: true
+            })
             .on('error', error =>
               _this.logger.log('error', `Generating CSV: ${error}.`)
             )
@@ -197,8 +202,8 @@ class mysqlExecutor extends Execution {
             reject();
           });
         }
-        // NO FILE EXPORT
-        // ***************
+        // NO FILE EXPORT - DATA_OUTPUT
+        // ****************************
         else {
           queryStream.on('result', row => {
             if (isFirstRow) {
@@ -208,9 +213,10 @@ class mysqlExecutor extends Execution {
               }
               isFirstRow = false;
             }
+            results.push(row);
           });
           queryStream.on('end', _ => {
-            _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader));
+            _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader, results));
             connection.destroy();
             resolve();
           });
@@ -222,9 +228,9 @@ class mysqlExecutor extends Execution {
       });
     }
 
-    function prepareEndOptions(firstRow, rowCounter, resultSetHeader) {
+    function prepareEndOptions(firstRow, rowCounter, resultSetHeader, results) {
       //STANDARD OUPUT:
-      endOptions.data_output = firstRow || '';
+      endOptions.data_output = results || '';
 
       //EXTRA DATA OUTPUT:
       endOptions.extra_output = {};

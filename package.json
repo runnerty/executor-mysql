@@ -1,6 +1,6 @@
 {
   "name": "@runnerty/executor-mysql",
-  "version": "2.0.0-rc0",
+  "version": "2.0.0-rc1",
   "description": "Runnerty module: MySql executor",
   "author": "Coderty",
   "license": "MIT",
@@ -22,7 +22,8 @@
   "homepage": "https://github.com/runnerty/executor-mysql#readme",
   "dependencies": {
     "exceljs": "3.4.0",
-    "mysql2": "2.0.1"
+    "fast-csv": "3.4.0",
+    "mysql2": "2.0.2"
   },
   "devDependencies": {
     "prettier": "^1.19.1"
