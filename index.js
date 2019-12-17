@@ -1,6 +1,6 @@
 'use strict';
 
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const Excel = require('exceljs');
 const csv = require('fast-csv');
 const fs = require('fs');
@@ -74,7 +74,11 @@ class mysqlExecutor extends Execution {
           }
         }
 
-        const queryStream = connection.query(queryOptions);
+        try {
+          const queryStream = connection.query(queryOptions);
+        } catch (error) {
+          reject(error);
+        }
 
         let author = 'Runnerty';
         let sheetName = 'Sheet';
@@ -134,9 +138,9 @@ class mysqlExecutor extends Execution {
         else if (params.csvFileExport) {
           const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
           const csvStream = csv
-            .format(params.csvOptions || {
+            .format(Object.assign({
               headers: true
-            })
+            }, params.csvOptions || {}))
             .on('error', error =>
               _this.logger.log('error', `Generating CSV: ${error}.`)
             )
