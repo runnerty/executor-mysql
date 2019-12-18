@@ -1,6 +1,6 @@
 'use strict';
 
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 const Excel = require('exceljs');
 const csv = require('fast-csv');
 const fs = require('fs');
@@ -32,7 +32,7 @@ class mysqlExecutor extends Execution {
           const _query = await _this.paramsReplace(values.command, options);
           endOptions.command_executed = _query;
 
-          const connection = await mysql.createConnection({
+          const connection = mysql.createConnection({
             host: values.host,
             socketPath: values.socketPath,
             port: values.port,
@@ -64,170 +64,164 @@ class mysqlExecutor extends Execution {
 
         if (params.localInFile) {
           if (fs.existsSync(params.localInFile)) {
-            queryOptions.infileStreamFactory = function () {
+            queryOptions.infileStreamFactory = function() {
               return fs.createReadStream(params.localInFile);
             };
           } else {
-            reject(
-              `executeMysql - localInFile not exists: ${params.localInFile}`
-            );
+            reject(`executeMysql - localInFile not exists: ${params.localInFile}`);
           }
         }
 
         try {
           const queryStream = connection.query(queryOptions);
-        } catch (error) {
-          reject(error);
-        }
+          let author = 'Runnerty';
+          let sheetName = 'Sheet';
+          let isFirstRow = true;
+          let firstRow = {};
+          let resultSetHeader;
+          let rowCounter = 0;
+          let results = [];
 
-        let author = 'Runnerty';
-        let sheetName = 'Sheet';
-        let isFirstRow = true;
-        let firstRow = {};
-        let resultSetHeader;
-        let rowCounter = 0;
-        let results = [];
+          // XLSX FILE EXPORT
+          // ****************
+          if (params.xlsxFileExport) {
+            const options = {
+              filename: params.xlsxFileExport,
+              useStyles: true,
+              useSharedStrings: true
+            };
+            const workbook = new Excel.stream.xlsx.WorkbookWriter(options);
 
-        // XLSX FILE EXPORT
-        // ****************
-        if (params.xlsxFileExport) {
-          const options = {
-            filename: params.xlsxFileExport,
-            useStyles: true,
-            useSharedStrings: true
-          };
-          const workbook = new Excel.stream.xlsx.WorkbookWriter(options);
+            let sheet = workbook.addWorksheet(params.xlsxSheetName ? params.xlsxSheetName : sheetName);
+            workbook.creator = params.xlsxAuthorName ? params.xlsxAuthorName : author;
 
-          let sheet = workbook.addWorksheet(
-            params.xlsxSheetName ? params.xlsxSheetName : sheetName
-          );
-          workbook.creator = params.xlsxAuthorName ?
-            params.xlsxAuthorName :
-            author;
+            workbook.lastPrinted = new Date();
 
-          workbook.lastPrinted = new Date();
-
-          queryStream.on('result', row => {
-            if (isFirstRow) {
-              firstRow = row;
-              if (row.hasOwnProperty('ResultSetHeader')) {
-                resultSetHeader = row.ResultSetHeader;
+            queryStream.on('result', row => {
+              if (isFirstRow) {
+                firstRow = row;
+                if (row.hasOwnProperty('ResultSetHeader')) {
+                  resultSetHeader = row.ResultSetHeader;
+                }
+                sheet.columns = generateHeader(row);
+                isFirstRow = false;
               }
-              sheet.columns = generateHeader(row);
-              isFirstRow = false;
-            }
-            sheet.addRow(row).commit();
-            rowCounter++;
-          });
-          queryStream.on('end', _ => {
-            workbook.commit().then(() => {
-              _this.end(
-                prepareEndOptions(firstRow, rowCounter, resultSetHeader)
-              );
+              sheet.addRow(row).commit();
+              rowCounter++;
+            });
+            queryStream.on('end', _ => {
+              workbook.commit().then(() => {
+                _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader));
+                connection.destroy();
+                resolve();
+              });
+            });
+            queryStream.on('error', err => {
+              _this.logger.log('error', `Generating xlsx: ${err}.`);
+              reject(err);
+            });
+          }
+          // CSV FILE EXPORT
+          // ***************
+          else if (params.csvFileExport) {
+            const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
+            const csvStream = csv
+              .format(
+                Object.assign(
+                  {
+                    headers: true
+                  },
+                  params.csvOptions || {}
+                )
+              )
+              .on('error', error => _this.logger.log('error', `Generating CSV: ${error}.`))
+              // .on("data", row => console.log(row))
+              .on('end', rowCount => {
+                fileStreamWriter.end();
+                _this.end(prepareEndOptions(firstRow, rowCount, resultSetHeader));
+                connection.destroy();
+              });
+
+            csvStream.pipe(fileStreamWriter);
+
+            queryStream.on('result', row => {
+              if (isFirstRow) {
+                firstRow = row;
+                if (row.hasOwnProperty('ResultSetHeader')) {
+                  resultSetHeader = row.ResultSetHeader;
+                }
+                isFirstRow = false;
+              }
+
+              csvStream.write(row);
+            });
+            queryStream.on('end', _ => {
+              csvStream.end();
+              resolve();
+            });
+            queryStream.on('error', err => {
+              _this.logger.log('error', `Generating CSV: ${err}.`);
+              reject();
+            });
+          }
+          // TEXT FILE EXPORT JSON
+          // *********************
+          else if (params.fileExport) {
+            const fileStreamWriter = fs.createWriteStream(params.fileExport);
+
+            queryStream.on('result', row => {
+              if (isFirstRow) {
+                firstRow = row;
+                if (row.hasOwnProperty('ResultSetHeader')) {
+                  resultSetHeader = row.ResultSetHeader;
+                }
+                isFirstRow = false;
+                fileStreamWriter.write('[\n');
+                fileStreamWriter.write(JSON.stringify(row));
+              } else {
+                fileStreamWriter.write(',\n' + JSON.stringify(row));
+              }
+              rowCounter++;
+            });
+
+            queryStream.on('end', _ => {
+              fileStreamWriter.write('\n]');
+              fileStreamWriter.end();
+              _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader));
               connection.destroy();
               resolve();
             });
-          });
-          queryStream.on('error', err => {
-            _this.logger.log('error', `Generating xlsx: ${err}.`);
-            reject(err);
-          });
-        }
-        // CSV FILE EXPORT
-        // ***************
-        else if (params.csvFileExport) {
-          const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
-          const csvStream = csv
-            .format(Object.assign({
-              headers: true
-            }, params.csvOptions || {}))
-            .on('error', error =>
-              _this.logger.log('error', `Generating CSV: ${error}.`)
-            )
-            // .on("data", row => console.log(row))
-            .on('end', rowCount => {
-              fileStreamWriter.end();
-              _this.end(prepareEndOptions(firstRow, rowCount, resultSetHeader));
-              connection.destroy();
+
+            queryStream.on('error', err => {
+              _this.logger.log('error', `Generating file: ${err}.`);
+              reject();
             });
-
-          csvStream.pipe(fileStreamWriter);
-
-          queryStream.on('result', row => {
-            if (isFirstRow) {
-              firstRow = row;
-              if (row.hasOwnProperty('ResultSetHeader')) {
-                resultSetHeader = row.ResultSetHeader;
+          }
+          // NO FILE EXPORT - DATA_OUTPUT
+          // ****************************
+          else {
+            queryStream.on('result', row => {
+              if (isFirstRow) {
+                firstRow = row;
+                if (row.hasOwnProperty('ResultSetHeader')) {
+                  resultSetHeader = row.ResultSetHeader;
+                }
+                isFirstRow = false;
               }
-              isFirstRow = false;
-            }
-
-            csvStream.write(row);
-          });
-          queryStream.on('end', _ => {
-            csvStream.end();
-            resolve();
-          });
-          queryStream.on('error', err => {
-            _this.logger.log('error', `Generating CSV: ${err}.`);
-            reject();
-          });
-        }
-        // TEXT FILE EXPORT JSON
-        // *********************
-        else if (params.fileExport) {
-          const fileStreamWriter = fs.createWriteStream(params.fileExport);
-
-          queryStream.on('result', row => {
-            if (isFirstRow) {
-              firstRow = row;
-              if (row.hasOwnProperty('ResultSetHeader')) {
-                resultSetHeader = row.ResultSetHeader;
-              }
-              isFirstRow = false;
-              fileStreamWriter.write('[\n');
-              fileStreamWriter.write(JSON.stringify(row));
-            } else {
-              fileStreamWriter.write(',\n' + JSON.stringify(row));
-            }
-            rowCounter++;
-          });
-
-          queryStream.on('end', _ => {
-            fileStreamWriter.write('\n]');
-            fileStreamWriter.end();
-            _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader));
-            connection.destroy();
-            resolve();
-          });
-
-          queryStream.on('error', err => {
-            _this.logger.log('error', `Generating file: ${err}.`);
-            reject();
-          });
-        }
-        // NO FILE EXPORT - DATA_OUTPUT
-        // ****************************
-        else {
-          queryStream.on('result', row => {
-            if (isFirstRow) {
-              firstRow = row;
-              if (row.hasOwnProperty('ResultSetHeader')) {
-                resultSetHeader = row.ResultSetHeader;
-              }
-              isFirstRow = false;
-            }
-            results.push(row);
-          });
-          queryStream.on('end', _ => {
-            _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader, results));
-            connection.destroy();
-            resolve();
-          });
-          queryStream.on('error', err => {
-            _this.logger.log('error', `MySQL Query: ${err}.`);
-            reject();
-          });
+              results.push(row);
+            });
+            queryStream.on('end', _ => {
+              _this.end(prepareEndOptions(firstRow, rowCounter, resultSetHeader, results));
+              connection.destroy();
+              resolve();
+            });
+            queryStream.on('error', err => {
+              _this.logger.log('error', `MySQL Query: ${err}.`);
+              reject();
+            });
+          }
+        } catch (error) {
+          reject(error);
         }
       });
     }
@@ -240,8 +234,7 @@ class mysqlExecutor extends Execution {
       endOptions.extra_output = {};
       endOptions.extra_output.db_fieldCount = rowCounter;
       if (resultSetHeader) {
-        endOptions.extra_output.db_fieldCount =
-          resultSetHeader.fieldCount || rowCounter;
+        endOptions.extra_output.db_fieldCount = resultSetHeader.fieldCount || rowCounter;
         endOptions.extra_output.db_affectedRows = resultSetHeader.affectedRows;
         endOptions.extra_output.db_changedRows = resultSetHeader.changedRows;
         endOptions.extra_output.db_insertId = resultSetHeader.insertId;
@@ -303,10 +296,8 @@ class mysqlExecutor extends Execution {
           });
       } else {
         endOptions.end = 'error';
-        endOptions.messageLog =
-          'executeMysql dont have command or command_file';
-        endOptions.err_output =
-          'executeMysql dont have command or command_file';
+        endOptions.messageLog = 'executeMysql dont have command or command_file';
+        endOptions.err_output = 'executeMysql dont have command or command_file';
         _this.end(endOptions);
       }
     }
