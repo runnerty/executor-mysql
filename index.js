@@ -193,7 +193,7 @@ class mysqlExecutor extends Execution {
             });
 
             queryStream.on('error', err => {
-              _this.logger.log('error', `Generating file: ${err}.`);
+              _this.logger.log('error', `Generating JSON file: ${err}.`);
               reject();
             });
           }
