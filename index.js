@@ -19,8 +19,7 @@ class mysqlExecutor extends Execution {
       end: 'end'
     };
 
-    function prepareQuery(values) {
-
+    async function prepareQuery(values) {
       const options = {
         useExtraValue: values.args || false,
         useProcessValues: true,
@@ -52,11 +51,10 @@ class mysqlExecutor extends Execution {
       } catch (error) {
         return Promise.reject(error);
       }
-
     }
 
     function executeQuery(connection, query) {
-      return new Promise((resolve, reject) => {
+      return new Promise(async (resolve, reject) => {
         let queryOptions = {
           sql: query
         };
@@ -126,7 +124,8 @@ class mysqlExecutor extends Execution {
             const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
             const csvStream = csv
               .format(
-                Object.assign({
+                Object.assign(
+                  {
                     headers: true
                   },
                   params.csvOptions || {}
