@@ -1,6 +1,6 @@
 'use strict';
 
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 const Excel = require('exceljs');
 const csv = require('fast-csv');
 const fs = require('fs');
@@ -20,37 +20,45 @@ class mysqlExecutor extends Execution {
     };
 
     async function prepareQuery(values) {
-      const options = {
-        useExtraValue: values.args || false,
-        useProcessValues: true,
-        useGlobalValues: true,
-        altValueReplace: 'null'
-      };
+      return new Promise(async (_resolve, _reject) => {
+        const options = {
+          useExtraValue: values.args || false,
+          useProcessValues: true,
+          useGlobalValues: true,
+          altValueReplace: 'null'
+        };
 
-      try {
-        const _query = await _this.paramsReplace(values.command, options);
-        endOptions.command_executed = _query;
+        try {
+          const _query = await _this.paramsReplace(values.command, options);
+          endOptions.command_executed = _query;
 
-        const connection = await mysql.createConnection({
-          host: values.host,
-          socketPath: values.socketPath,
-          port: values.port,
-          ssl: values.ssl,
-          user: values.user,
-          password: values.password,
-          database: values.database,
-          multipleStatements: values.multipleStatements || true,
-          charset: values.charset,
-          timezone: values.timezone,
-          insecureAuth: values.insecureAuth,
-          debug: values.debug,
-          connectTimeout: values.connectTimeout || 60000
-        });
+          const connection = mysql.createConnection({
+            host: values.host,
+            socketPath: values.socketPath,
+            port: values.port,
+            ssl: values.ssl,
+            user: values.user,
+            password: values.password,
+            database: values.database,
+            multipleStatements: values.multipleStatements || true,
+            charset: values.charset,
+            timezone: values.timezone,
+            insecureAuth: values.insecureAuth,
+            debug: values.debug,
+            connectTimeout: values.connectTimeout || 60000
+          });
 
-        return await executeQuery(connection, _query);
-      } catch (error) {
-        return Promise.reject(error);
-      }
+          connection.on('error', error => {
+            _reject('Connection error:' + error);
+          });
+
+          executeQuery(connection, _query).then(res => {
+            _resolve(res);
+          });
+        } catch (error) {
+          _reject(error);
+        }
+      });
     }
 
     function executeQuery(connection, query) {
@@ -70,7 +78,7 @@ class mysqlExecutor extends Execution {
         }
 
         try {
-          const queryStream = await connection.query(queryOptions);
+          const queryStream = connection.query(queryOptions);
           let author = 'Runnerty';
           let sheetName = 'Sheet';
           let isFirstRow = true;
@@ -132,7 +140,6 @@ class mysqlExecutor extends Execution {
                 )
               )
               .on('error', error => _this.logger.log('error', `Generating CSV: ${error}.`))
-              // .on("data", row => console.log(row))
               .on('end', rowCount => {
                 fileStreamWriter.end();
                 _this.end(prepareEndOptions(firstRow, rowCount, resultSetHeader));
