@@ -103,15 +103,10 @@ class mysqlExecutor extends Execution {
       // ***************
       else if (params.csvFileExport) {
         const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
+        const paramsCSV = params.csvOptions;
+        if (!paramsCSV.hasOwnProperty('headers')) paramsCSV.headers = true;
         const csvStream = csv
-          .format(
-            Object.assign(
-              {
-                headers: true
-              },
-              params.csvOptions || {}
-            )
-          )
+          .format(paramsCSV)
           .on('error', err => {
             this.endOptions.end = 'error';
             this.endOptions.messageLog = `executeMysql: ${err}`;
