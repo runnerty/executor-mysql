@@ -89,21 +89,21 @@ class mysqlExecutor extends Execution {
           await workbook.commit();
           this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
         queryStream.on('error', err => {
           this.endOptions.end = 'error';
           this.endOptions.messageLog = `executeMysql: ${err}`;
           this.endOptions.err_output = `executeMysql: ${err}`;
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
       }
       // CSV FILE EXPORT
       // ***************
       else if (params.csvFileExport) {
         const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
-        const paramsCSV = params.csvOptions;
+        const paramsCSV = params.csvOptions || {};
         if (!paramsCSV.hasOwnProperty('headers')) paramsCSV.headers = true;
         const csvStream = csv
           .format(paramsCSV)
@@ -112,13 +112,13 @@ class mysqlExecutor extends Execution {
             this.endOptions.messageLog = `executeMysql: ${err}`;
             this.endOptions.err_output = `executeMysql: ${err}`;
             this._end(this.endOptions);
-            connection.destroy();
+            connection.end();
           })
           .on('end', rowCount => {
             fileStreamWriter.end();
             this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
             this._end(this.endOptions);
-            connection.destroy();
+            connection.end();
           });
 
         csvStream.pipe(fileStreamWriter);
@@ -136,14 +136,14 @@ class mysqlExecutor extends Execution {
         });
         queryStream.on('end', _ => {
           csvStream.end();
-          connection.destroy();
+          connection.end();
         });
         queryStream.on('error', err => {
           this.endOptions.end = 'error';
           this.endOptions.messageLog = `executeMysql: ${err}`;
           this.endOptions.err_output = `executeMysql: ${err}`;
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
       }
       // TEXT FILE EXPORT JSON
@@ -171,7 +171,7 @@ class mysqlExecutor extends Execution {
           fileStreamWriter.end();
           this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
 
         queryStream.on('error', err => {
@@ -179,7 +179,7 @@ class mysqlExecutor extends Execution {
           this.endOptions.messageLog = `executeMysql: ${err}`;
           this.endOptions.err_output = `executeMysql: ${err}`;
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
       }
       // NO FILE EXPORT - DATA_OUTPUT
@@ -198,14 +198,14 @@ class mysqlExecutor extends Execution {
         queryStream.on('end', _ => {
           this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
         queryStream.on('error', err => {
           this.endOptions.end = 'error';
           this.endOptions.messageLog = `executeMysql: ${err}`;
           this.endOptions.err_output = `executeMysql: ${err}`;
           this._end(this.endOptions);
-          connection.destroy();
+          connection.end();
         });
       }
     } catch (err) {
@@ -213,7 +213,7 @@ class mysqlExecutor extends Execution {
       this.endOptions.messageLog = `executeMysql: ${err}`;
       this.endOptions.err_output = `executeMysql: ${err}`;
       this._end(this.endOptions);
-      connection.destroy();
+      connection.end();
     }
   }
 
@@ -272,7 +272,7 @@ class mysqlExecutor extends Execution {
       }
       const query = await this.prepareQuery(params);
       this.endOptions.command_executed = query;
-      const connection = mysql.createConnection({
+      const connection = mysql.createPool({
         host: params.host,
         socketPath: params.socketPath,
         port: params.port,
