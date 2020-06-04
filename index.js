@@ -114,7 +114,7 @@ class mysqlExecutor extends Execution {
             this._end(this.endOptions);
             connection.end();
           })
-          .on('end', rowCount => {
+          .on('end', () => {
             fileStreamWriter.end();
             this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
             this._end(this.endOptions);
@@ -132,6 +132,7 @@ class mysqlExecutor extends Execution {
             isFirstRow = false;
           }
 
+          rowCounter++;
           csvStream.write(row);
         });
         queryStream.on('end', _ => {
@@ -193,6 +194,7 @@ class mysqlExecutor extends Execution {
             }
             isFirstRow = false;
           }
+          rowCounter++;
           results.push(row);
         });
         queryStream.on('end', _ => {
@@ -230,8 +232,8 @@ class mysqlExecutor extends Execution {
       this.endOptions.extra_output.db_changedRows = resultSetHeader.changedRows;
       this.endOptions.extra_output.db_insertId = resultSetHeader.insertId;
       this.endOptions.extra_output.db_warningCount = resultSetHeader.warningCount;
-      this.endOptions.extra_output.db_message = resultSetHeader.message;
-      this.endOptions.msg_output = resultSetHeader.message || '';
+      this.endOptions.extra_output.db_message = resultSetHeader.info;
+      this.endOptions.msg_output = resultSetHeader.info || '';
     } else {
       this.endOptions.extra_output.db_firstRow = JSON.stringify(firstRow);
       if (firstRow instanceof Object) {
