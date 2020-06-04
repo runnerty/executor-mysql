@@ -167,8 +167,9 @@ class mysqlExecutor extends Execution {
           rowCounter++;
         });
 
-        queryStream.on('end', _ => {
-          fileStreamWriter.write('\n]');
+        queryStream.on('end', () => {
+          if (rowCounter) fileStreamWriter.write('\n]');
+
           fileStreamWriter.end();
           this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
           this._end(this.endOptions);
@@ -225,9 +226,10 @@ class mysqlExecutor extends Execution {
 
     //EXTRA DATA OUTPUT:
     this.endOptions.extra_output = {};
-    this.endOptions.extra_output.db_fieldCount = rowCounter;
+    this.endOptions.extra_output.db_countrows = rowCounter;
     if (resultSetHeader) {
-      this.endOptions.extra_output.db_fieldCount = resultSetHeader.fieldCount || rowCounter;
+      console.log(resultSetHeader);
+      this.endOptions.extra_output.db_fieldCount = resultSetHeader.fieldCount;
       this.endOptions.extra_output.db_affectedRows = resultSetHeader.affectedRows;
       this.endOptions.extra_output.db_changedRows = resultSetHeader.changedRows;
       this.endOptions.extra_output.db_insertId = resultSetHeader.insertId;
