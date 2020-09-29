@@ -10,10 +10,11 @@
   <img alt="code style: prettier" src="https://img.shields.io/badge/code_style-prettier-ff69b4.svg">
 </a>
 
-# MySql executor for [Runnerty]:
+# MySQL executor for [Runnerty]:
 
 
 ### Configuration sample:
+Add in [config.json]:
 ```json
 {
   "id": "mysql_default",
@@ -27,6 +28,7 @@
 ```
 
 ### Plan sample:
+Add in [plan.json]:
 ```json
 {
   "id":"mysql_default",
@@ -96,3 +98,10 @@ For file upload you must indicate the path of the file to be loaded in the `loca
 
 
 [Runnerty]: http://www.runnerty.io
+[downloads-image]: https://img.shields.io/npm/dm/@runnerty/executor-mysql.svg
+[npm-url]: https://www.npmjs.com/package/@runnerty/executor-mysql
+[npm-image]: https://img.shields.io/npm/v/@runnerty/executor-mysql.svg
+[david-badge]: https://david-dm.org/runnerty/executor-mysql.svg
+[david-badge-url]: https://david-dm.org/runnerty/executor-mysql
+[config.json]: http://docs.runnerty.io/config/
+[plan.json]: http://docs.runnerty.io/plan/
