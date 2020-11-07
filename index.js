@@ -76,8 +76,8 @@ class mysqlExecutor extends Execution {
         queryStream.on('result', row => {
           if (isFirstRow) {
             firstRow = row;
-            if (row.hasOwnProperty('ResultSetHeader')) {
-              resultSetHeader = row.ResultSetHeader;
+            if (row.constructor.name === 'ResultSetHeader') {
+              resultSetHeader = row;
             }
             sheet.columns = this.generateHeader(row);
             isFirstRow = false;
@@ -126,8 +126,8 @@ class mysqlExecutor extends Execution {
         queryStream.on('result', row => {
           if (isFirstRow) {
             firstRow = row;
-            if (row.hasOwnProperty('ResultSetHeader')) {
-              resultSetHeader = row.ResultSetHeader;
+            if (row.constructor.name === 'ResultSetHeader') {
+              resultSetHeader = row;
             }
             isFirstRow = false;
           }
@@ -155,8 +155,8 @@ class mysqlExecutor extends Execution {
         queryStream.on('result', row => {
           if (isFirstRow) {
             firstRow = row;
-            if (row.hasOwnProperty('ResultSetHeader')) {
-              resultSetHeader = row.ResultSetHeader;
+            if (row.constructor.name === 'ResultSetHeader') {
+              resultSetHeader = row;
             }
             isFirstRow = false;
             fileStreamWriter.write('[\n');
@@ -190,8 +190,8 @@ class mysqlExecutor extends Execution {
         queryStream.on('result', row => {
           if (isFirstRow) {
             firstRow = row;
-            if (row.hasOwnProperty('ResultSetHeader')) {
-              resultSetHeader = row.ResultSetHeader;
+            if (row.constructor.name === 'ResultSetHeader') {
+              resultSetHeader = row;
             }
             isFirstRow = false;
           }
@@ -228,7 +228,6 @@ class mysqlExecutor extends Execution {
     this.endOptions.extra_output = {};
     this.endOptions.extra_output.db_countrows = rowCounter;
     if (resultSetHeader) {
-      console.log(resultSetHeader);
       this.endOptions.extra_output.db_fieldCount = resultSetHeader.fieldCount;
       this.endOptions.extra_output.db_affectedRows = resultSetHeader.affectedRows;
       this.endOptions.extra_output.db_changedRows = resultSetHeader.changedRows;

@@ -12,8 +12,12 @@
 
 # MySQL executor for [Runnerty]:
 
+### Installation:
+```bash
+npm i @runnerty/executor-mysql
+```
 
-### Configuration sample:
+### Configuration:
 Add in [config.json]:
 ```json
 {
