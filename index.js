@@ -275,6 +275,21 @@ class mysqlExecutor extends Execution {
       }
       const query = await this.prepareQuery(params);
       this.endOptions.command_executed = query;
+
+      //SSL
+      if (params.ssl) {
+        try {
+          if (params.ssl.ca) params.ssl.ca = fs.readFileSync(params.ssl.ca);
+          if (params.ssl.cert) params.ssl.cert = fs.readFileSync(params.ssl.cert);
+          if (params.ssl.key) params.ssl.key = fs.readFileSync(params.ssl.key);
+        } catch (error) {
+          this.endOptions.end = 'error';
+          this.endOptions.messageLog = `executeMysql reading ssl file/s: ${error}`;
+          this.endOptions.err_output = `executeMysql reading ssl file/s: ${error}`;
+          this._end(this.endOptions);
+        }
+      }
+
       const connection = mysql.createPool({
         host: params.host,
         socketPath: params.socketPath,
