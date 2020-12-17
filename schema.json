@@ -128,7 +128,7 @@
               "type": "string"
             },
             "localInFile": {
-              "type": "boolean"
+              "type": "string"
             }
           }
         },
@@ -161,7 +161,7 @@
               "type": "string"
             },
             "localInFile": {
-              "type": "boolean"
+              "type": "string"
             },
             "csvOptions": {
               "type": "object",

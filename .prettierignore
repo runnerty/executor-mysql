@@ -4,6 +4,7 @@ node_modules
 .gitignore
 .prettierignore
 LICENSE
+*.sql
 *.png
 *.txt
 TODO
