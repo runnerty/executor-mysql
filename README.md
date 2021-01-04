@@ -14,8 +14,24 @@
 
 ### Installation:
 
+Through NPM
+
 ```bash
 npm i @runnerty/executor-mysql
+```
+
+You can also add modules to your project with [runnerty-cli]
+
+```bash
+npx runnerty-cli add @runnerty/executor-mysql
+```
+
+This command installs the module in your project, adds example configuration in your `config.json` and creates an example plan of use.
+
+If you have installed [runnerty-cli] globally you can include the module with this command:
+
+```bash
+rty add @runnerty/executor-mysql
 ```
 
 ### Configuration:
@@ -203,4 +219,5 @@ For file upload you must indicate the path of the file to be loaded in the `loca
 [david-badge]: https://david-dm.org/runnerty/executor-mysql.svg
 [david-badge-url]: https://david-dm.org/runnerty/executor-mysql
 [config.json]: http://docs.runnerty.io/config/
+[runnerty-cli]: https://www.npmjs.com/package/runnerty-cli
 [plan.json]: http://docs.runnerty.io/plan/
