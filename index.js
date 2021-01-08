@@ -4,11 +4,11 @@ const mysql = require('mysql2');
 const Excel = require('exceljs');
 const csv = require('fast-csv');
 const fs = require('fs');
+const fsp = require('fs').promises;
 
-const loadSQLFile = global.libUtils.loadSQLFile;
-const Execution = global.ExecutionClass;
+const Executor = require('@runnerty/module-core').Executor;
 
-class mysqlExecutor extends Execution {
+class mysqlExecutor extends Executor {
   constructor(process) {
     super(process);
     this.ended = false;
@@ -265,7 +265,13 @@ class mysqlExecutor extends Execution {
     try {
       if (!params.command) {
         if (params.command_file) {
-          params.command = await loadSQLFile(params.command_file);
+          // Load SQL file:
+          try {
+            await fsp.access(params.command_file, fs.constants.F_OK | fs.constants.W_OK);
+            params.command = await fsp.readFile(params.command_file, 'utf8');
+          } catch (err) {
+            throw new Error(`Load SQLFile: ${err}`);
+          }
         } else {
           this.endOptions.end = 'error';
           this.endOptions.messageLog = 'executeMysql dont have command or command_file';
