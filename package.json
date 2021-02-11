@@ -2,7 +2,7 @@
   "name": "@runnerty/executor-mysql",
   "version": "3.0.2",
   "description": "Runnerty module: MySQL executor",
-  "author": "Coderty",
+  "author": "Runnerty Tech",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
