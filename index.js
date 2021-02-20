@@ -5,6 +5,7 @@ const Excel = require('exceljs');
 const csv = require('fast-csv');
 const fs = require('fs');
 const fsp = require('fs').promises;
+const path = require('path');
 
 const Executor = require('@runnerty/module-core').Executor;
 
@@ -61,6 +62,7 @@ class mysqlExecutor extends Executor {
       // XLSX FILE EXPORT
       // ****************
       if (params.xlsxFileExport) {
+        await fsp.access(path.dirname(params.xlsxFileExport));
         const options = {
           filename: params.xlsxFileExport,
           useStyles: true,
@@ -102,6 +104,7 @@ class mysqlExecutor extends Executor {
       // CSV FILE EXPORT
       // ***************
       else if (params.csvFileExport) {
+        await fsp.access(path.dirname(params.csvFileExport));
         const fileStreamWriter = fs.createWriteStream(params.csvFileExport);
         const paramsCSV = params.csvOptions || {};
         if (!paramsCSV.hasOwnProperty('headers')) paramsCSV.headers = true;
@@ -150,6 +153,7 @@ class mysqlExecutor extends Executor {
       // TEXT FILE EXPORT JSON
       // *********************
       else if (params.fileExport) {
+        await fsp.access(path.dirname(params.fileExport));
         const fileStreamWriter = fs.createWriteStream(params.fileExport);
 
         queryStream.on('result', row => {
