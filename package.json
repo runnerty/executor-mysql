@@ -1,6 +1,6 @@
 {
   "name": "@runnerty/executor-mysql",
-  "version": "3.0.4",
+  "version": "3.0.5",
   "description": "Runnerty module: MySQL executor",
   "author": "Runnerty Tech",
   "license": "MIT",
@@ -28,10 +28,11 @@
     "@runnerty/module-core": "~3.0.5",
     "exceljs": "~4.2.0",
     "fast-csv": "~4.3.6",
+    "json-stream-stringify": "^2.0.3",
     "mysql2": "~2.2.5"
   },
   "devDependencies": {
-    "eslint": "^7.20.0",
+    "eslint": "^7.21.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",
     "prettier": "^2.2.1"
