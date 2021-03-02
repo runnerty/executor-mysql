@@ -28,7 +28,7 @@
     "@runnerty/module-core": "~3.0.5",
     "exceljs": "~4.2.0",
     "fast-csv": "~4.3.6",
-    "json-stream-stringify": "^2.0.3",
+    "json-stream-stringify": "~2.0.3",
     "mysql2": "~2.2.5"
   },
   "devDependencies": {
