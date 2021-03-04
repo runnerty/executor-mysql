@@ -130,8 +130,8 @@ class mysqlExecutor extends Executor {
                 resultSetHeader = row;
               }
               isFirstRow = false;
-            } else rowCounter++;
-            csvStream.write(row);
+            }
+            rowCounter++;
           })
           .on('error', err => {
             connection.end();
