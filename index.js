@@ -258,10 +258,7 @@ class mysqlExecutor extends Executor {
             throw new Error(`Load SQLFile: ${err}`);
           }
         } else {
-          this.endOptions.end = 'error';
-          this.endOptions.messageLog = 'executeMysql dont have command or command_file';
-          this.endOptions.err_output = 'executeMysql dont have command or command_file';
-          this._end();
+          this._error('executeMysql dont have command or command_file');
         }
       }
       const query = await this.prepareQuery(params);
@@ -274,10 +271,7 @@ class mysqlExecutor extends Executor {
           if (params.ssl.cert) params.ssl.cert = fs.readFileSync(params.ssl.cert);
           if (params.ssl.key) params.ssl.key = fs.readFileSync(params.ssl.key);
         } catch (error) {
-          this.endOptions.end = 'error';
-          this.endOptions.messageLog = `executeMysql reading ssl file/s: ${error}`;
-          this.endOptions.err_output = `executeMysql reading ssl file/s: ${error}`;
-          this._end();
+          this._error(`executeMysql reading ssl file/s: ${error}`);
         }
       }
 
@@ -298,27 +292,21 @@ class mysqlExecutor extends Executor {
       });
 
       connection.on('error', err => {
-        this.endOptions.end = 'error';
-        this.endOptions.messageLog = `executeMysql: ${err}`;
-        this.endOptions.err_output = `executeMysql: ${err}`;
-        this._end();
+        this._error(`executeMysql: ${err}`);
       });
 
       const result = await this.executeQuery(connection, query, params);
       return result;
     } catch (err) {
-      this.endOptions.end = 'error';
-      this.endOptions.messageLog = `executeMysql: ${err}`;
-      this.endOptions.err_output = `executeMysql: ${err}`;
-      this._end();
+      this._error(`executeMysql: ${err}`);
     }
   }
 
   _error(errMsg) {
     this.endOptions.end = 'error';
-    this.endOptions.messageLog = errMsg;
-    this.endOptions.err_output = errMsg;
-    this._end();
+    this.endOptions.messageLog = errMsg || this.endOptions.messageLog;
+    this.endOptions.err_output = errMsg || this.endOptions.err_output;
+    this.end(this.endOptions);
   }
 
   _end() {

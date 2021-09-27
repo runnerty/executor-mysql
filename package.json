@@ -1,6 +1,6 @@
 {
   "name": "@runnerty/executor-mysql",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "description": "Runnerty module: MySQL executor",
   "author": "Runnerty Tech",
   "license": "MIT",
@@ -25,16 +25,16 @@
   },
   "homepage": "https://github.com/runnerty/executor-mysql#readme",
   "dependencies": {
-    "@runnerty/module-core": "~3.0.5",
+    "@runnerty/module-core": "~3.0.6",
     "exceljs": "~4.3.0",
     "fast-csv": "~4.3.6",
-    "json-stream-stringify": "~2.0.3",
+    "json-stream-stringify": "~2.0.4",
     "mysql2": "~2.3.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.4.1",
-    "prettier": "^2.3.2"
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.4.1"
   }
 }
