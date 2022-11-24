@@ -288,7 +288,8 @@ class mysqlExecutor extends Executor {
         timezone: params.timezone,
         insecureAuth: params.insecureAuth,
         debug: params.debug,
-        connectTimeout: params.connectTimeout || 60000
+        connectTimeout: params.connectTimeout || 60000,
+        dateStrings: params.dateStrings || false
       });
 
       connection.on('error', err => {

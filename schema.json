@@ -57,6 +57,9 @@
         "connectTimeout": {
           "type": "number"
         },
+        "dateStrings": {
+          "type": ["boolean", "number"]
+        },
         "csvOptions": {
           "type": "object",
           "properties": {
