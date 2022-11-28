@@ -58,7 +58,7 @@
           "type": "number"
         },
         "dateStrings": {
-          "type": ["boolean", "number"]
+          "type": ["boolean", "string"]
         },
         "csvOptions": {
           "type": "object",
