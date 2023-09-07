@@ -5,7 +5,7 @@ const Excel = require('exceljs');
 const csv = require('fast-csv');
 const fs = require('fs');
 const fsp = require('fs').promises;
-const JsonStreamStringify = require('json-stream-stringify');
+const { JsonStreamStringify } = require('json-stream-stringify');
 const path = require('path');
 
 const Executor = require('@runnerty/module-core').Executor;
