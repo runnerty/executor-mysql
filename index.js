@@ -62,6 +62,16 @@ class mysqlExecutor extends Executor {
     }
 
     try {
+      // The query `timeout` above only arms once the command starts on an
+      // already-established connection: mysql2 disarms `connectTimeout` as
+      // soon as the FIRST byte arrives from the server, so a connection that
+      // stalls halfway through the handshake (e.g. after an out-of-sequence
+      // auth packet) would hang forever with no timer covering it. Bound the
+      // acquisition phase (connect + handshake) with the same deadline.
+      if (params.queryTimeout) {
+        await this.acquireConnection(connection, params.queryTimeout);
+      }
+
       const queryStream = connection.query(queryOptions);
       const author = 'Runnerty';
       const sheetName = 'Sheet';
@@ -214,6 +224,41 @@ class mysqlExecutor extends Executor {
       connection.end();
       this._error(`executeMysql: ${err}`);
     }
+  }
+
+  // Proves the pool can deliver a fully-handshaken connection within
+  // `timeoutMs`. On success the connection is released back to the
+  // (per-execution) pool, where the subsequent `pool.query()` reuses it.
+  // On expiry every connection held by the pool is destroyed — a connection
+  // stuck mid-handshake is checked out, so `pool.end()` alone would never
+  // close it — and the promise rejects so the process always ends.
+  acquireConnection(pool, timeoutMs) {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const timer = setTimeout(() => {
+        settled = true;
+        if (pool._allConnections && typeof pool._allConnections.toArray === 'function') {
+          for (const pending of pool._allConnections.toArray()) {
+            pending.destroy();
+          }
+        }
+        reject(new Error(`connection acquire timeout after ${timeoutMs}ms (server stalled during connect/handshake)`));
+      }, timeoutMs);
+      pool.getConnection((err, connection) => {
+        if (settled) {
+          if (connection) connection.destroy();
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        if (err) {
+          reject(err);
+        } else {
+          connection.release();
+          resolve();
+        }
+      });
+    });
   }
 
   prepareEndOptions(firstRow, rowCounter, resultSetHeader, results) {
