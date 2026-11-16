@@ -104,10 +104,10 @@ class mysqlExecutor extends Executor {
           await workbook.commit();
           this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
           this._end();
-          connection.end();
+          this._closePool(connection);
         });
         queryStream.on('error', err => {
-          connection.end();
+          this._closePool(connection);
           this._error(`executeMysql: ${err}`);
         });
       }
@@ -122,14 +122,14 @@ class mysqlExecutor extends Executor {
         const csvStream = csv
           .format(paramsCSV)
           .on('error', err => {
-            connection.end();
+            this._closePool(connection);
             this._error(`executeMysql - csvStream: ${err}`);
           })
           .on('end', () => {
             fileStreamWriter.end();
             this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
             this._end();
-            connection.end();
+            this._closePool(connection);
           });
 
         // STREAMED
@@ -145,7 +145,7 @@ class mysqlExecutor extends Executor {
             rowCounter++;
           })
           .on('error', err => {
-            connection.end();
+            this._closePool(connection);
             this._error(`executeMysql: ${err}`);
           })
           .stream()
@@ -180,7 +180,7 @@ class mysqlExecutor extends Executor {
               rowCounter++;
             })
             .on('error', err => {
-              connection.end();
+              this._closePool(connection);
               this._error(`ERROR executeMysql - queryStream ${err}`);
             })
             .stream()
@@ -201,17 +201,17 @@ class mysqlExecutor extends Executor {
           results.push(row);
         });
         queryStream.on('end', _ => {
-          connection.end();
+          this._closePool(connection);
           this.prepareEndOptions(firstRow, rowCounter, resultSetHeader, results);
           this._end();
         });
         queryStream.on('error', err => {
-          connection.end();
+          this._closePool(connection);
           this._error(`executeMysql: ${err}`);
         });
       }
     } catch (err) {
-      connection.end();
+      this._closePool(connection);
       this._error(`executeMysql: ${err}`);
     }
   }
@@ -312,6 +312,15 @@ class mysqlExecutor extends Executor {
     } catch (err) {
       this._error(`executeMysql: ${err}`);
     }
+  }
+
+  _closePool(pool) {
+    // End the pool only once: after a `queryTimeout` error mysql2 still delivers
+    // the late result and emits `end` when the server answers, and a second
+    // pool.end() throws "Can't add new command when connection is in closed state".
+    if (this.poolClosed) return;
+    this.poolClosed = true;
+    pool.end();
   }
 
   _error(errMsg) {
