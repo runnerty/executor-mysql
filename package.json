@@ -25,11 +25,11 @@
   },
   "homepage": "https://github.com/runnerty/executor-mysql#readme",
   "dependencies": {
-    "@runnerty/module-core": "~3.1.2",
+    "@runnerty/module-core": "~3.1.3",
     "exceljs": "~4.4.0",
     "fast-csv": "~5.0.1",
     "json-stream-stringify": "~3.1.5",
-    "mysql2": "~3.22.5"
+    "mysql2": "~3.24.6"
   },
   "devDependencies": {
     "eslint": "^9.11.1",
